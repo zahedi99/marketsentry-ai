@@ -44,6 +44,13 @@ select = [
     "RUF",      # ruff-specific
 ]
 
+[tool.ruff.lint.isort]
+# Our own packages: sorted into their own import group, after third-party ones.
+known-first-party = [
+    "market_core", "data_sources", "agent_tools", "briefing_agents", "ms_db",
+    "api", "worker", "mcp_server",
+]
+
 # --- mypy: static type checking ----------------------------------------------
 [tool.mypy]
 python_version = "3.12"
