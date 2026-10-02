@@ -1,0 +1,9 @@
+{
+  "name": "marketsentry",
+  "private": true,
+  "packageManager": "pnpm@12.8.1",
+  "scripts": {
+    "dev:web": "pnpm --filter @marketsentry/web dev",
+    "build:web": "pnpm --filter @marketsentry/web build"
+  }
+}

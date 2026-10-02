@@ -1,8 +1,76 @@
-[project] 
-name = "market-score", version = "0.1.0",
-requires-python = ">=3.12" , dependencies = ["pydantic>=2"]
-[build-system]
-requires = ["uv_build>=0.12.22,<0.13"],
-build_backend = "uv_build"
-[tool.uv.build_backend]
-module-root = "" 
+# Workspace root. This is not a library: it lists the workspace members and
+# holds shared dev tooling and config for ruff, mypy and pytest.
+
+[project]
+name = "marketsentry"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "packages/market_core",
+    "packages/data_sources",
+    "packages/tools",
+    "packages/agents",
+    "packages/db",
+    "apps/api",
+    "apps/worker",
+    "apps/mcp_server",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14",
+    "mypy>=1.18",
+    "pytest>=8",
+    "pytest-cov>=6",
+]
+
+# --- ruff: linter + formatter ------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes (unused imports, undefined names)
+    "I",        # import sorting
+    "B",        # bugbear (likely bugs)
+    "UP",       # pyupgrade (modern syntax)
+    "SIM",      # simplifications
+    "DTZ",      # naive datetimes are banned: we use tz-aware UTC everywhere
+    "RUF",      # ruff-specific
+]
+
+# --- mypy: static type checking ----------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = [
+    "packages/market_core/market_core",
+    "packages/data_sources/data_sources",
+    "packages/tools/agent_tools",
+    "packages/agents/briefing_agents",
+    "packages/db/ms_db",
+    "apps/api/api",
+    "apps/worker/worker",
+    "apps/mcp_server/mcp_server",
+]
+
+# --- pytest ------------------------------------------------------------------
+[tool.pytest.ini_options]
+# importlib mode lets several folders all be called "tests" without clashing.
+addopts = "--import-mode=importlib"
+testpaths = [
+    "packages/market_core/tests",
+    "packages/data_sources/tests",
+    "packages/tools/tests",
+    "packages/agents/tests",
+    "packages/db/tests",
+    "apps/api/tests",
+    "apps/worker/tests",
+    "apps/mcp_server/tests",
+]

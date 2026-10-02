@@ -30,3 +30,6 @@ data/processed/
 .terraform/
 *.tfstate
 *.tfstate.*
+# Tool caches
+.mypy_cache/
+.ruff_cache/
