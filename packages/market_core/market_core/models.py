@@ -56,5 +56,5 @@ class Move(StrictModel):
     end_at: AwareDatetime
     start_price: Decimal = Field(gt=0)
     end_price: Decimal = Field(gt=0)
-    change: Decimal = Field(gt=0)
-    change_pct: Decimal = Field(gt=0)
+    change: Decimal
+    change_pct: Decimal 
