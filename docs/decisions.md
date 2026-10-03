@@ -83,6 +83,27 @@ which are worth investigating. Options considered:
   low-score move with major news, or drop a high-score move with no driver. They never do
   the arithmetic.
 
+### Scoring rules
+- **Typical move:** sample standard deviation of the last daily % changes; needs at least
+  10 changes, otherwise "not enough history".
+- **Sensitivity** is a user setting (per instrument later). A score at or above the
+  threshold reaches that level:
+
+  | Sensitivity | NOTABLE | MAJOR |
+  |---|---|---|
+  | high | 1.0 | 2.0 |
+  | normal (default) | 1.5 | 3.0 |
+  | low | 2.0 | 4.0 |
+
+  Rationale: absolute size is misleading (0.8% is a big move for EUR/USD and a quiet day
+  for Tesla), and at 1.5 roughly 13% of ordinary nights are flagged per instrument, which
+  is acceptable noise because agents filter afterwards.
+- **Not enough history:** fall back to an assumed typical move per asset class
+  (equity 1.5%, index 1.0%, fx 0.5%, crypto 4.0%, commodity 1.5%), and flag that a
+  fallback was used. A new instrument must never hide a move.
+- **Zero volatility** (flat history): any non-zero move is MAJOR (score undefined); no move
+  is NONE. When in doubt, surface it.
+
 ### Why not the alternatives
 - **LLM-only:** unreliable at comparing many numbers, non-deterministic (hard to test),
   costly to run over every instrument nightly, and conflicts with "numbers come from data,
