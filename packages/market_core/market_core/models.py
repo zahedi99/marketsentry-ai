@@ -50,11 +50,13 @@ class PriceSnapshot(StrictModel):
     @classmethod
     def to_utc(cls, v: datetime) -> datetime:
         return v.astimezone(UTC)
-class Move(StrictModel): 
+
+
+class Move(StrictModel):
     symbol: str = Field(min_length=1, max_length=20)
     start_at: AwareDatetime
     end_at: AwareDatetime
     start_price: Decimal = Field(gt=0)
     end_price: Decimal = Field(gt=0)
     change: Decimal
-    change_pct: Decimal 
+    change_pct: Decimal
