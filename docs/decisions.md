@@ -7,6 +7,7 @@ New ADRs go at the bottom. Superseded ADRs stay, marked as superseded.
 |---|-------|--------|
 | 001 | Monorepo tooling and package naming | Accepted |
 | 002 | Agent framework (own loop vs LangGraph vs Claude Agent SDK) | Pending — decide before build step 8 |
+| 003 | Hybrid significance: code scores moves, agents decide stories | Accepted |
 
 ---
 
@@ -55,3 +56,55 @@ Distribution names use hyphens, import names underscores (Python convention).
 - `pytest` exits with code 5 ("no tests collected") until build step 2 adds tests.
 - On Windows with the uv cache on a different drive from the repo, uv warns that it can't
   hardlink; set `UV_LINK_MODE=copy` to silence it (no functional impact).
+
+---
+
+## ADR-003: Hybrid significance: code scores moves, agents decide stories
+
+**Date:** 2026-10-03 · **Status:** Accepted
+
+### Context
+Each night the watchlist produces many price moves; most are noise. Something must decide
+which are worth investigating. Options considered:
+1. **LLM-only:** agents read all raw moves and decide.
+2. **Trained ML model:** learn "newsworthy or not" from labelled history.
+3. **Code-only:** a fixed rule decides and nothing else.
+4. **Hybrid:** code scores every move; agents make the final call with news context.
+
+### Decision
+**Hybrid (4).**
+- **Code (`market_core.significance`)** scores each move by how unusual it is *for that
+  instrument*: `|move %| / typical daily move %` (a z-score style measure, with volatility
+  taken from the instrument's own recent history). It outputs a score, a level and a
+  code-generated reason. Thresholds are deliberately low: the job is **recall**, not to
+  have the final say.
+- **Agents (Sentinel / Orchestrator)** receive the ranked candidates *plus* news-only
+  events, and decide what becomes a story (**precision and judgment**). They may promote a
+  low-score move with major news, or drop a high-score move with no driver. They never do
+  the arithmetic.
+
+### Why not the alternatives
+- **LLM-only:** unreliable at comparing many numbers, non-deterministic (hard to test),
+  costly to run over every instrument nightly, and conflicts with "numbers come from data,
+  never from an LLM".
+- **Trained ML model:** needs labelled "newsworthy" examples that we don't have. The
+  z-score is the standard baseline any learned model must beat.
+- **Code-only:** misses news-driven stories with little price reaction (e.g. a CEO
+  resigns after the close) and ignores context such as earnings days.
+
+### Knowledge transfer
+The design already relies on transferred knowledge: pretrained LLMs judge newsworthiness
+zero-shot, and the z-score applies established quant practice. Future options, adopted
+**only if they beat the baseline in evals**:
+- Pretrained finance text models (e.g. FinBERT) to classify overnight news cheaply before
+  LLM agents read it.
+- A transfer-learned significance model trained on weak labels (e.g. a move followed by a
+  spike in news coverage).
+
+### Consequences
+- Significance is deterministic, explainable and unit-tested.
+- The Sentinel must also surface news-only events, not only scored moves (build step 8).
+- Evals (step 9) compare score-only vs LLM-only vs hybrid on recorded nights.
+- Known simplification: overnight windows are shorter than a trading day, so "typical
+  daily move" overstates the normal overnight move. Revisit with time-scaling if evals
+  show it matters.
