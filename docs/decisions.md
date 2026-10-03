@@ -84,8 +84,15 @@ which are worth investigating. Options considered:
   the arithmetic.
 
 ### Scoring rules
-- **Typical move:** sample standard deviation of the last daily % changes; needs at least
-  10 changes, otherwise "not enough history".
+- **Typical move:** sample standard deviation of the **last 20** daily % changes (about one
+  trading month, the common window for recent volatility). With fewer than 20, it is "not
+  enough history". One number serves as both minimum and window.
+  - Why 20, not 10: the relative error of a sample stdev is about `1/sqrt(2(n-1))`, roughly
+    24% at n=10 vs 16% at n=20. Longer windows go stale as volatility regimes change.
+  - Cost: instruments with < 20 days use the cruder fallback. Mitigation: **backfill** at
+    least a month of history from the data provider when an instrument is added (build
+    steps 3/4), so the fallback applies only to genuinely new listings.
+  - Tunable and cheap to change; evals (step 9) compare windows.
 - **Sensitivity** is a user setting (per instrument later). A score at or above the
   threshold reaches that level:
 

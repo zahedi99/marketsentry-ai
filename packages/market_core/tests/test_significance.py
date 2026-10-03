@@ -26,11 +26,11 @@ def move(pct: str, symbol: str = "EURUSD") -> Move:
     return compute_move(start, end)
 
 
-def alternating_closes(n_changes: int, pct: str) -> list[Decimal]:
+def alternating_closes(n_changes: int, pct: str, start: str = "100") -> list[Decimal]:
     """Closes whose daily changes alternate +pct%, -pct%, +pct%, ..."""
     up = 1 + Decimal(pct) / 100
     down = 1 - Decimal(pct) / 100
-    closes = [Decimal("100")]
+    closes = [Decimal(start)]
     for i in range(n_changes):
         closes.append(closes[-1] * (up if i % 2 == 0 else down))
     return closes
@@ -39,29 +39,42 @@ def alternating_closes(n_changes: int, pct: str) -> list[Decimal]:
 # --- typical_move ---------------------------------------------------------------
 
 
-def test_min_history_is_ten_changes() -> None:
-    assert MIN_HISTORY == 10
+def test_min_history_is_twenty_changes() -> None:
+    assert MIN_HISTORY == 20
 
 
 def test_typical_move_needs_enough_history() -> None:
-    # 10 closes give only 9 daily changes: not enough.
-    assert typical_move(alternating_closes(9, "1")) is None
+    # 20 closes give only 19 daily changes: not enough.
+    assert typical_move(alternating_closes(19, "1")) is None
 
 
 def test_typical_move_with_exactly_enough_history() -> None:
-    assert typical_move(alternating_closes(10, "1")) is not None
+    assert typical_move(alternating_closes(20, "1")) is not None
 
 
 def test_typical_move_is_stdev_of_daily_pct_changes() -> None:
-    # Changes are +2, -2, +2, ... (10 of them): mean 0, sample stdev = sqrt(40/9) = 2.1082
-    result = typical_move(alternating_closes(10, "2"))
+    # Changes are +2, -2, +2, ... (20 of them): mean 0, sample stdev = sqrt(80/19) = 2.0520
+    result = typical_move(alternating_closes(20, "2"))
 
     assert isinstance(result, Decimal)
-    assert float(result) == pytest.approx(2.108185, rel=1e-5)
+    assert float(result) == pytest.approx(2.051957, rel=1e-5)
+
+
+def test_typical_move_uses_only_the_most_recent_changes() -> None:
+    # A wild period (±10%) long ago, then a calm recent month (±2%).
+    # Only the last MIN_HISTORY changes count, so the old wild period is ignored.
+    wild = alternating_closes(10, "10")
+    calm = alternating_closes(20, "2", start=str(wild[-1]))
+    closes = wild + calm[1:]
+
+    result = typical_move(closes)
+
+    assert result is not None
+    assert float(result) == pytest.approx(2.051957, rel=1e-5)
 
 
 def test_typical_move_of_flat_history_is_zero() -> None:
-    assert typical_move([Decimal("50")] * 11) == 0
+    assert typical_move([Decimal("50")] * 21) == 0
 
 
 # --- score_move: the core idea ----------------------------------------------------
