@@ -25,6 +25,10 @@ class UnknownSymbolError(ProviderError):
     pass
 
 
+class RateLimitError(ProviderError):
+    """Raised when the provider refuses a request because too many were made."""
+
+
 @runtime_checkable
 class MarketDataProvider(Protocol):
     def daily_closes(self, symbol: str, start: date, end: date) -> list[DailyClose]:
