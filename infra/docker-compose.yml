@@ -1,0 +1,24 @@
+# Local development stack. Start with `make db-up`, stop with `make db-down`.
+# Credentials match DATABASE_URL in .env.example. Local-only: never reuse in production.
+
+name: marketsentry
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: marketsentry
+      POSTGRES_PASSWORD: marketsentry
+      POSTGRES_DB: marketsentry
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketsentry -d marketsentry"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

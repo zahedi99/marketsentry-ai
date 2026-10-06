@@ -1,9 +1,9 @@
 # One entry point for common tasks. Run `make help` to list targets.
 # Recipes are kept to plain commands so they work from cmd, PowerShell or bash.
 
-COMPOSE = docker compose -f infra/docker-compose.yml --env-file .env
+COMPOSE = docker compose -f infra/docker-compose.yml
 
-.PHONY: help install lint format typecheck test check up down
+.PHONY: help install lint format typecheck test check up down db-up db-down db-shell
 
 help:
 	@echo "install    Install Python (uv) and web (pnpm) dependencies"
@@ -13,6 +13,9 @@ help:
 	@echo "test       Run unit tests (pytest)"
 	@echo "check      lint + typecheck + test (what CI runs)"
 	@echo "up / down  Start / stop the full stack (docker compose)"
+	@echo "db-up      Start Postgres and wait until it is healthy"
+	@echo "db-down    Stop Postgres (data is kept in the pgdata volume)"
+	@echo "db-shell   Open a psql prompt inside the database container"
 
 install:
 	uv sync --all-packages
@@ -39,3 +42,12 @@ up:
 
 down:
 	$(COMPOSE) down
+
+db-up:
+	$(COMPOSE) up -d --wait db
+
+db-down:
+	$(COMPOSE) down
+
+db-shell:
+	$(COMPOSE) exec db psql -U marketsentry -d marketsentry
