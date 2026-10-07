@@ -4,6 +4,8 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "market-core",
+    "psycopg[binary]>=3",
+    "sqlalchemy>=2",
 ]
 
 [build-system]
