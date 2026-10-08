@@ -3,6 +3,7 @@ name = "ms-db"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.14",
     "market-core",
     "psycopg[binary]>=3",
     "sqlalchemy>=2",

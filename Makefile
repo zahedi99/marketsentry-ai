@@ -2,8 +2,9 @@
 # Recipes are kept to plain commands so they work from cmd, PowerShell or bash.
 
 COMPOSE = docker compose -f infra/docker-compose.yml
+ALEMBIC = uv run alembic -c packages/db/alembic.ini
 
-.PHONY: help install lint format typecheck test check up down db-up db-down db-shell
+.PHONY: help install lint format typecheck test check up down db-up db-down db-shell migrate migration
 
 help:
 	@echo "install    Install Python (uv) and web (pnpm) dependencies"
@@ -16,6 +17,8 @@ help:
 	@echo "db-up      Start Postgres and wait until it is healthy"
 	@echo "db-down    Stop Postgres (data is kept in the pgdata volume)"
 	@echo "db-shell   Open a psql prompt inside the database container"
+	@echo "migrate    Apply database migrations (alembic upgrade head)"
+	@echo "migration  Generate a migration from model changes: make migration m=\"message\""
 
 install:
 	uv sync --all-packages
@@ -51,3 +54,9 @@ db-down:
 
 db-shell:
 	$(COMPOSE) exec db psql -U marketsentry -d marketsentry
+
+migrate:
+	$(ALEMBIC) upgrade head
+
+migration:
+	$(ALEMBIC) revision --autogenerate -m "$(m)"
