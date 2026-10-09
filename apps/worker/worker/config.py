@@ -10,6 +10,11 @@ def load_environment() -> None:
     load_dotenv(override=False)
 
 
+def optional(name: str, default: str) -> str:
+    """An environment variable with a default when unset or blank."""
+    return os.environ.get(name, "").strip() or default
+
+
 def required(name: str) -> str:
     """An environment variable that must be set; fails with a clear message if not."""
     value = os.environ.get(name, "").strip()
