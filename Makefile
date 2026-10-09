@@ -4,7 +4,7 @@
 COMPOSE = docker compose -f infra/docker-compose.yml
 ALEMBIC = uv run alembic -c packages/db/alembic.ini
 
-.PHONY: help install lint format typecheck test check up down db-up db-down db-shell migrate migration seed
+.PHONY: help install lint format typecheck test check up down db-up db-down db-shell migrate migration seed capture
 
 help:
 	@echo "install    Install Python (uv) and web (pnpm) dependencies"
@@ -20,6 +20,7 @@ help:
 	@echo "migrate    Apply database migrations (alembic upgrade head)"
 	@echo "migration  Generate a migration from model changes: make migration m=\"message\""
 	@echo "seed       Apply migrations, then add the default watchlist (idempotent)"
+	@echo "capture    Fetch and store the latest price of every watchlist instrument once"
 
 install:
 	uv sync --all-packages
@@ -64,3 +65,6 @@ migration:
 
 seed: migrate
 	uv run python -m worker.seed
+
+capture:
+	uv run python -m worker.jobs.overnight_capture

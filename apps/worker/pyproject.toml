@@ -7,6 +7,7 @@ dependencies = [
     "data-sources",
     "briefing-agents",
     "ms-db",
+    "python-dotenv>=1",
 ]
 
 [build-system]
