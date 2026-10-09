@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
     "market-core",
+    "websockets>=13",
 ]
 
 [build-system]

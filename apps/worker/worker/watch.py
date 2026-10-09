@@ -52,10 +52,10 @@ def render(
     lines = [
         f"{BOLD}MarketSentry live prices{RESET}  "
         f"{DIM}{now.astimezone(tz):%Y-%m-%d %H:%M:%S} {tz.key} | from database, 0 API calls{RESET}",
-        f"{DIM}{'symbol':<9}  {'price':>14}    {'quoted (local)':<16}  {'age':>4}{RESET}",
+        f"{DIM}{'symbol':<9}  {'price':>14}    {'quoted (local)':<19}  {'age':>4}{RESET}",
     ]
     if not snapshots:
-        lines.append("no prices stored yet: run `make stream` or `make capture`")
+        lines.append("no prices stored yet: run `make live`, `make stream` or `make capture`")
     for symbol in sorted(snapshots):
         snap = snapshots[symbol]
         quoted = snap.observed_at.astimezone(tz)
@@ -63,7 +63,7 @@ def render(
         age = format_age(now - snap.observed_at)
         lines.append(
             f"{symbol:<9}  {format_price(snap.price):>14} {marker}"
-            f"  {quoted:%a %d %b %H:%M}  {age:>4}"
+            f"  {quoted:%a %d %b %H:%M:%S}  {age:>4}"
         )
     lines.append(f"\n{DIM}Ctrl+C to stop{RESET}")
     return lines
@@ -75,7 +75,7 @@ def main() -> None:
     from worker.config import load_environment, optional
 
     parser = argparse.ArgumentParser(description="Watch the latest stored prices.")
-    parser.add_argument("--every", type=float, default=5.0, help="refresh seconds (default 5)")
+    parser.add_argument("--every", type=float, default=2.0, help="refresh seconds (default 2)")
     args = parser.parse_args()
 
     load_environment()

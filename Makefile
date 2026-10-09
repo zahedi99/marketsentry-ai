@@ -4,7 +4,7 @@
 COMPOSE = docker compose -f infra/docker-compose.yml
 ALEMBIC = uv run alembic -c packages/db/alembic.ini
 
-.PHONY: help install lint format typecheck test check up down db-up db-down db-shell migrate migration seed capture schedule stream watch
+.PHONY: help install lint format typecheck test check up down db-up db-down db-shell migrate migration seed capture schedule stream live watch
 
 help:
 	@echo "install    Install Python (uv) and web (pnpm) dependencies"
@@ -23,6 +23,7 @@ help:
 	@echo "capture    Fetch and store the latest price of every watchlist instrument once"
 	@echo "schedule   Capture on a loop, only during the sleep window (real mode)"
 	@echo "stream     Capture on a loop all the time, paced to the free-tier budget"
+	@echo "live       Stream live prices over WebSockets (crypto via Binance; stocks via Finnhub)"
 	@echo "watch      Show the latest stored prices live (0 API calls)"
 
 install:
@@ -80,3 +81,6 @@ stream:
 
 watch:
 	uv run python -m worker.watch
+
+live:
+	uv run python -m worker.jobs.live_stream

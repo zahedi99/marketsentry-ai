@@ -1,7 +1,8 @@
 """Seed the default watchlist into the database. Run with `make seed`.
 
 Idempotent: running it again updates names/currencies but never duplicates instruments.
-All symbols were checked against the Twelve Data free tier (2026-10-09).
+All symbols were checked against the Twelve Data free tier (2026-10-09); the crypto
+pairs also stream live from Binance (`make live`).
 """
 
 from sqlalchemy.orm import Session
@@ -33,6 +34,9 @@ DEFAULT_WATCHLIST: tuple[Instrument, ...] = (
     ),
     Instrument(
         symbol="BTC/USD", name="Bitcoin / US Dollar", asset_class=AssetClass.CRYPTO, currency="USD"
+    ),
+    Instrument(
+        symbol="ETH/USD", name="Ether / US Dollar", asset_class=AssetClass.CRYPTO, currency="USD"
     ),
     Instrument(
         symbol="XAU/USD", name="Gold / US Dollar", asset_class=AssetClass.COMMODITY, currency="USD"
