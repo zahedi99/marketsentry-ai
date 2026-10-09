@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from enum import StrEnum
 
@@ -60,3 +60,11 @@ class Move(StrictModel):
     end_price: Decimal = Field(gt=0)
     change: Decimal
     change_pct: Decimal
+
+
+class DailyClose(StrictModel):
+    """One instrument's closing price for one trading day."""
+
+    symbol: str
+    day: date
+    close: Decimal = Field(gt=0)

@@ -1,16 +1,16 @@
 from datetime import date
-from decimal import Decimal
 from typing import Protocol, runtime_checkable
 
-from pydantic import Field
+# DailyClose moved to market_core (the database needs it too); re-exported here.
+from market_core.models import DailyClose, PriceSnapshot
 
-from market_core.models import PriceSnapshot, StrictModel
-
-
-class DailyClose(StrictModel):
-    symbol: str
-    day: date
-    close: Decimal = Field(gt=0)
+__all__ = [
+    "DailyClose",
+    "MarketDataProvider",
+    "ProviderError",
+    "RateLimitError",
+    "UnknownSymbolError",
+]
 
 
 class ProviderError(Exception):
