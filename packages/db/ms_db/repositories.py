@@ -42,16 +42,24 @@ def upsert_instrument(session: Session, instrument: Instrument) -> None:
     session.execute(stmt)
 
 
-def get_instrument(session: Session, symbol: str) -> Instrument | None:
-    row = session.scalars(select(InstrumentRow).where(InstrumentRow.symbol == _key(symbol))).first()
-    if row is None:
-        return None
+def _to_instrument(row: InstrumentRow) -> Instrument:
     return Instrument(
         symbol=row.symbol,
         name=row.name,
         asset_class=AssetClass(row.asset_class),
         currency=row.currency,
     )
+
+
+def get_instrument(session: Session, symbol: str) -> Instrument | None:
+    row = session.scalars(select(InstrumentRow).where(InstrumentRow.symbol == _key(symbol))).first()
+    return None if row is None else _to_instrument(row)
+
+
+def list_instruments(session: Session) -> list[Instrument]:
+    """Every instrument on the watchlist, sorted by symbol."""
+    rows = session.scalars(select(InstrumentRow).order_by(InstrumentRow.symbol))
+    return [_to_instrument(row) for row in rows]
 
 
 # --- daily closes ---------------------------------------------------------------

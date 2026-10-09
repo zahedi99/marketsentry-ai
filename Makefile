@@ -4,7 +4,7 @@
 COMPOSE = docker compose -f infra/docker-compose.yml
 ALEMBIC = uv run alembic -c packages/db/alembic.ini
 
-.PHONY: help install lint format typecheck test check up down db-up db-down db-shell migrate migration
+.PHONY: help install lint format typecheck test check up down db-up db-down db-shell migrate migration seed
 
 help:
 	@echo "install    Install Python (uv) and web (pnpm) dependencies"
@@ -19,6 +19,7 @@ help:
 	@echo "db-shell   Open a psql prompt inside the database container"
 	@echo "migrate    Apply database migrations (alembic upgrade head)"
 	@echo "migration  Generate a migration from model changes: make migration m=\"message\""
+	@echo "seed       Apply migrations, then add the default watchlist (idempotent)"
 
 install:
 	uv sync --all-packages
@@ -60,3 +61,6 @@ migrate:
 
 migration:
 	$(ALEMBIC) revision --autogenerate -m "$(m)"
+
+seed: migrate
+	uv run python -m worker.seed

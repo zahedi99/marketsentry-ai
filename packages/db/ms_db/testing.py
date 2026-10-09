@@ -1,4 +1,4 @@
-"""Fixtures for tests that need a real Postgres.
+"""Shared pytest fixtures for tests that need a real Postgres (registered in /conftest.py).
 
 Tests run against a separate database (`marketsentry_test` by default, or
 $TEST_DATABASE_URL), created and migrated once per test run. Each test runs inside a
@@ -21,11 +21,8 @@ ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
 DEFAULT_TEST_URL = "postgresql+psycopg://marketsentry:marketsentry@localhost:5432/marketsentry_test"
 
 
-def test_database_url() -> str:
+def testing_database_url() -> str:
     return os.environ.get("TEST_DATABASE_URL", DEFAULT_TEST_URL)
-
-
-test_database_url.__test__ = False  # type: ignore[attr-defined]  # not a test itself
 
 
 def alembic_config(url: str) -> Config:
@@ -57,7 +54,7 @@ def _ensure_database_exists(url: str) -> None:
 
 @pytest.fixture(scope="session")
 def migrated_engine() -> Iterator[Engine]:
-    url = test_database_url()
+    url = testing_database_url()
     try:
         _ensure_database_exists(url)
     except OperationalError:

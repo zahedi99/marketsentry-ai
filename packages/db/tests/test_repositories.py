@@ -14,6 +14,7 @@ from ms_db.repositories import (
     get_daily_closes,
     get_instrument,
     latest_snapshots,
+    list_instruments,
     save_daily_closes,
     save_snapshot,
     upsert_instrument,
@@ -67,6 +68,17 @@ def test_upsert_updates_existing_instrument(session: Session) -> None:
 
 def test_unknown_instrument_is_none(session: Session) -> None:
     assert get_instrument(session, "NOPE") is None
+
+
+def test_list_instruments_sorted_by_symbol(session: Session) -> None:
+    add_instrument(session, "MSFT")
+    add_instrument(session, "AAPL")
+
+    assert [i.symbol for i in list_instruments(session)] == ["AAPL", "MSFT"]
+
+
+def test_list_instruments_empty(session: Session) -> None:
+    assert list_instruments(session) == []
 
 
 # --- daily closes ---------------------------------------------------------------

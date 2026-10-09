@@ -6,8 +6,7 @@ from alembic.migration import MigrationContext
 from sqlalchemy import Engine, inspect
 
 from ms_db.models import Base
-
-from .conftest import alembic_config
+from ms_db.testing import alembic_config
 
 
 def test_migrations_match_the_models(migrated_engine: Engine) -> None:
